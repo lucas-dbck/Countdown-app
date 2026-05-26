@@ -3,23 +3,36 @@
 import { useState } from "react"
 import { Pencil, Trash2 } from "lucide-react"
 import type { Countdown } from "@/hooks/use-countdowns"
-import { getDaysRemaining, getProgress } from "@/hooks/use-countdowns"
+import {
+  getDaysRemaining,
+  getProgress,
+  getWorkingDaysRemaining,
+  getWorkingDayProgress,
+} from "@/hooks/use-countdowns"
 import { cn } from "@/lib/utils"
 
 interface CountdownCardProps {
   countdown: Countdown
   onEdit: (countdown: Countdown) => void
   onDelete: (id: string) => void
+  onUpdate: (id: string, data: Partial<Omit<Countdown, "id">>) => void
 }
 
-export function CountdownCard({ countdown, onEdit, onDelete }: CountdownCardProps) {
+export function CountdownCard({ countdown, onEdit, onDelete, onUpdate }: CountdownCardProps) {
   const [confirmDelete, setConfirmDelete] = useState(false)
-  const days = getDaysRemaining(countdown.endDate)
-  const progress = getProgress(countdown.startDate, countdown.endDate)
+
+  const workingOnly = countdown.workingDaysOnly ?? false
+  const days = workingOnly
+    ? getWorkingDaysRemaining(countdown.endDate)
+    : getDaysRemaining(countdown.endDate)
+  const progress = workingOnly
+    ? getWorkingDayProgress(countdown.startDate, countdown.endDate)
+    : getProgress(countdown.startDate, countdown.endDate)
 
   const isPast = days < 0
   const isToday = days === 0
   const isSoon = days > 0 && days <= 7
+  const dayLabel = workingOnly ? (days === 1 ? "working day left" : "working days left") : days === 1 ? "day left" : "days left"
 
   const handleDeleteClick = () => {
     if (confirmDelete) {
@@ -93,8 +106,30 @@ export function CountdownCard({ countdown, onEdit, onDelete }: CountdownCardProp
           {isPast ? "0" : days}
         </span>
         <span className="text-muted-foreground text-sm pb-2 leading-tight">
-          {isPast ? "days ago" : isToday ? "today!" : days === 1 ? "day left" : "days left"}
+          {isPast ? "days ago" : isToday ? "today!" : dayLabel}
         </span>
+      </div>
+
+      {/* Working-days toggle */}
+      <div className="flex items-center gap-2">
+        <button
+          role="switch"
+          aria-checked={workingOnly}
+          aria-label="Toggle working days only"
+          onClick={() => onUpdate(countdown.id, { workingDaysOnly: !workingOnly })}
+          className={cn(
+            "relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+            workingOnly ? "bg-primary" : "bg-muted"
+          )}
+        >
+          <span
+            className={cn(
+              "pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-200",
+              workingOnly ? "translate-x-4" : "translate-x-0"
+            )}
+          />
+        </button>
+        <span className="text-xs text-muted-foreground select-none">Working days only</span>
       </div>
 
       {/* Progress bar */}

@@ -6,8 +6,9 @@ export interface Countdown {
   id: string
   emoji: string
   name: string
-  startDate: string  // ISO string — when the countdown was created
-  endDate: string    // ISO string — target date
+  startDate: string      // ISO string — when the countdown was created
+  endDate: string        // ISO string — target date
+  workingDaysOnly: boolean
 }
 
 const STORAGE_KEY = "countdowns-v1"
@@ -19,6 +20,7 @@ const DEFAULTS: Countdown[] = [
     name: "Summer vacation",
     startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
     endDate: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000).toISOString(),
+    workingDaysOnly: false,
   },
   {
     id: "default-2",
@@ -26,6 +28,7 @@ const DEFAULTS: Countdown[] = [
     name: "My birthday",
     startDate: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
     endDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+    workingDaysOnly: false,
   },
 ]
 
@@ -62,6 +65,7 @@ export function useCountdowns() {
         ...data,
         id: crypto.randomUUID(),
         startDate: new Date().toISOString(),
+        workingDaysOnly: data.workingDaysOnly ?? false,
       }
       persist([item, ...countdowns])
     },
@@ -109,4 +113,48 @@ export function getProgress(startDate: string, endDate: string): number {
 /** Formats a date as YYYY-MM-DD for <input type="date"> */
 export function toInputDate(iso: string): string {
   return iso.slice(0, 10)
+}
+
+/**
+ * Counts working days (Mon–Fri) between two dates, inclusive of start,
+ * exclusive of end. Returns a negative count if end is before start.
+ */
+function countWorkingDays(from: Date, to: Date): number {
+  const sign = to >= from ? 1 : -1
+  let cursor = new Date(sign === 1 ? from : to)
+  const stop = new Date(sign === 1 ? to : from)
+  cursor.setHours(0, 0, 0, 0)
+  stop.setHours(0, 0, 0, 0)
+  let count = 0
+  while (cursor < stop) {
+    const day = cursor.getDay()
+    if (day !== 0 && day !== 6) count++
+    cursor.setDate(cursor.getDate() + 1)
+  }
+  return sign * count
+}
+
+/** Returns working days remaining (Mon–Fri only). Can be negative if past. */
+export function getWorkingDaysRemaining(endDate: string): number {
+  const end = new Date(endDate)
+  end.setHours(0, 0, 0, 0)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  return countWorkingDays(today, end)
+}
+
+/**
+ * Returns progress 0–100 based on working days elapsed from start → end.
+ */
+export function getWorkingDayProgress(startDate: string, endDate: string): number {
+  const start = new Date(startDate)
+  const end = new Date(endDate)
+  start.setHours(0, 0, 0, 0)
+  end.setHours(0, 0, 0, 0)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const total = countWorkingDays(start, end)
+  if (total <= 0) return 100
+  const elapsed = countWorkingDays(start, today)
+  return Math.min(100, Math.max(0, (elapsed / total) * 100))
 }

@@ -79,6 +79,7 @@ export default function Home() {
                 countdown={countdown}
                 onEdit={openEdit}
                 onDelete={deleteCountdown}
+                onUpdate={updateCountdown}
               />
             ))}
           </div>
