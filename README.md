@@ -31,6 +31,10 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 The frontend calls `/api/countdowns`, and Next.js proxies those requests to Flask at `http://127.0.0.1:5000` by default. Set `FLASK_API_URL` if your Flask server runs somewhere else.
 
+## Deployment
+
+To make the app public, deploy the Next.js frontend to Vercel and the Flask backend to PythonAnywhere. See [DEPLOYMENT.md](DEPLOYMENT.md) for the full step-by-step guide.
+
 ## Accounts
 
 The app has email/password accounts. Each countdown belongs to the logged-in user, so different users see different countdown lists.
