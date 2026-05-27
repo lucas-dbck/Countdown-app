@@ -11,6 +11,11 @@ __v0_jsx-dev-runtime.ts
 
 # Common ignores
 node_modules
+.venv/
+.python-deps/
+.pip-cache/
+.tmp/
 .next/
 .DS_Store
 .vercel
+countdowns.db
