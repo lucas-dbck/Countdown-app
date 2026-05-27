@@ -6,11 +6,12 @@ import type { Countdown } from "@/hooks/use-countdowns"
 import { toInputDate } from "@/hooks/use-countdowns"
 import { cn } from "@/lib/utils"
 
+const DEFAULT_EMOJI = "🎉"
 const EMOJI_SUGGESTIONS = [
-  "\u{1F3D6}\u{FE0F}", "\u{1F382}", "\u{1F389}", "\u{1F3C3}", "\u{2708}\u{FE0F}",
-  "\u{1F393}", "\u{1F48D}", "\u{1F3E0}", "\u{1F3B8}", "\u{26BD}",
-  "\u{1F384}", "\u{1F30D}", "\u{1F680}", "\u{1F4C5}", "\u{1F525}",
-  "\u{1F4BC}", "\u{1F3AF}", "\u{1F338}", "\u{1F9F3}", "\u{1F381}",
+  "🏖️", "🎂", "🎉", "🏃", "✈️",
+  "🎓", "💍", "🏠", "🎸", "⚽",
+  "🎄", "🌍", "🚀", "📅", "🔥",
+  "💼", "🎯", "🌸", "🧳", "🎁",
 ]
 
 interface CountdownFormProps {
@@ -21,10 +22,10 @@ interface CountdownFormProps {
 }
 
 export function CountdownForm({ open, editing, onClose, onSave }: CountdownFormProps) {
-  const [emoji, setEmoji] = useState("\u{1F389}")
+  const [emoji, setEmoji] = useState(DEFAULT_EMOJI)
   const [name, setName] = useState("")
   const [endDate, setEndDate] = useState("")
-  const [emojiInput, setEmojiInput] = useState("\u{1F389}")
+  const [emojiInput, setEmojiInput] = useState(DEFAULT_EMOJI)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const nameRef = useRef<HTMLInputElement>(null)
@@ -37,8 +38,8 @@ export function CountdownForm({ open, editing, onClose, onSave }: CountdownFormP
       setName(editing.name)
       setEndDate(toInputDate(editing.end_date))
     } else {
-      setEmoji("\u{1F389}")
-      setEmojiInput("\u{1F389}")
+      setEmoji(DEFAULT_EMOJI)
+      setEmojiInput(DEFAULT_EMOJI)
       setName("")
       setEndDate("")
     }

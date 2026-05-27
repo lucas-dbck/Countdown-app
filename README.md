@@ -31,6 +31,19 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 The frontend calls `/api/countdowns`, and Next.js proxies those requests to Flask at `http://127.0.0.1:5000` by default. Set `FLASK_API_URL` if your Flask server runs somewhere else.
 
+## Accounts
+
+The app has email/password accounts. Each countdown belongs to the logged-in user, so different users see different countdown lists.
+
+For local development, Flask uses a simple default session secret. Before deploying online, set a real `SECRET_KEY` environment variable for the Flask backend.
+
+If the frontend and backend are hosted on different domains, set `FRONTEND_ORIGINS` on the Flask backend to the frontend URL. For HTTPS cross-domain cookies, also set:
+
+```bash
+SESSION_COOKIE_SAMESITE=None
+SESSION_COOKIE_SECURE=true
+```
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 ## Learn More
