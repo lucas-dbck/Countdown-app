@@ -6,11 +6,18 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [v0](https://v
 
 This repository is linked to a [v0](https://v0.app) project. You can continue developing by visiting the link below -- start new chats to make changes, and v0 will push commits directly to this repo. Every merge to `main` will automatically deploy.
 
-[Continue working on v0 →](https://v0.app/chat/projects/prj_dndaznpRkKYgEBMtQcxulQWAt5uR)
+[Continue working on v0](https://v0.app/chat/projects/prj_dndaznpRkKYgEBMtQcxulQWAt5uR)
 
 ## Getting Started
 
-First, run the development server:
+First, install the Python backend dependency and start Flask:
+
+```bash
+python -m pip install -r requirements.txt
+python app.py
+```
+
+Then, in another terminal, run the Next.js development server:
 
 ```bash
 npm run dev
@@ -21,6 +28,8 @@ pnpm dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+The frontend calls `/api/countdowns`, and Next.js proxies those requests to Flask at `http://127.0.0.1:5000` by default. Set `FLASK_API_URL` if your Flask server runs somewhere else.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
