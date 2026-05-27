@@ -1,14 +1,17 @@
 "use client"
 
 import { useState } from "react"
-import { Plus } from "lucide-react"
+import { LogOut, Plus } from "lucide-react"
+import { useAuth } from "@/hooks/use-auth"
 import { useCountdowns, type Countdown } from "@/hooks/use-countdowns"
+import { AuthForm } from "@/components/auth-form"
 import { CountdownCard } from "@/components/countdown-card"
 import { CountdownForm } from "@/components/countdown-form"
 import { EmptyState } from "@/components/empty-state"
 
 export default function Home() {
-  const { countdowns, hydrated, error, addCountdown, updateCountdown, deleteCountdown } = useCountdowns()
+  const auth = useAuth()
+  const { countdowns, hydrated, error, addCountdown, updateCountdown, deleteCountdown } = useCountdowns(Boolean(auth.user))
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<Countdown | null>(null)
 
@@ -36,29 +39,59 @@ export default function Home() {
     handleClose()
   }
 
+  const handleLogout = async () => {
+    handleClose()
+    await auth.logout()
+  }
+
+  if (!auth.hydrated) {
+    return (
+      <main className="min-h-screen bg-background flex items-center justify-center">
+        <div className="rounded-2xl bg-surface border border-border h-40 w-full max-w-sm animate-pulse" />
+      </main>
+    )
+  }
+
+  if (!auth.user) {
+    return <AuthForm onLogin={auth.login} onRegister={auth.register} />
+  }
+
   return (
     <main className="min-h-screen bg-background">
       <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b border-border">
         <div className="max-w-lg mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <span className="text-2xl leading-none select-none" aria-hidden="true">{"\u23F3"}</span>
-            <h1 className="text-foreground font-bold text-lg tracking-tight">Countdown</h1>
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="text-2xl leading-none select-none" aria-hidden="true">⏳</span>
+            <div className="min-w-0">
+              <h1 className="text-foreground font-bold text-lg tracking-tight">Countdown</h1>
+              <p className="text-muted-foreground text-xs truncate">{auth.user.email}</p>
+            </div>
           </div>
-          <button
-            onClick={openAdd}
-            aria-label="Add new countdown"
-            className="flex items-center gap-1.5 h-9 px-4 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 active:scale-95 transition-all"
-          >
-            <Plus size={15} />
-            <span>New</span>
-          </button>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleLogout}
+              aria-label="Log out"
+              className="h-9 w-9 rounded-xl text-muted-foreground hover:text-foreground hover:bg-surface transition-colors flex items-center justify-center"
+            >
+              <LogOut size={16} />
+            </button>
+            <button
+              onClick={openAdd}
+              aria-label="Add new countdown"
+              className="flex items-center gap-1.5 h-9 px-4 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 active:scale-95 transition-all"
+            >
+              <Plus size={15} />
+              <span>New</span>
+            </button>
+          </div>
         </div>
       </header>
 
       <div className="max-w-lg mx-auto px-4 py-6">
-        {error && (
+        {(auth.error || error) && (
           <p className="mb-4 rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive-foreground">
-            {error}
+            {auth.error || error}
           </p>
         )}
 
@@ -67,7 +100,7 @@ export default function Home() {
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="rounded-2xl bg-surface border border-border h-44 animate-pulse"
+                className="rounded-2xl bg-surface border border-border h-36 animate-pulse"
                 aria-hidden="true"
               />
             ))}
